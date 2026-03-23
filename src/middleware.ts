@@ -11,16 +11,18 @@ export function middleware(req: NextRequest) {
 
   const authHeader = req.headers.get('authorization')
 
-  if (authHeader) {
-    const base64 = authHeader.replace('Basic ', '')
-    const decoded = Buffer.from(base64, 'base64').toString('utf-8')
-    const [user, pass] = decoded.split(':')
+  if (authHeader && authHeader.startsWith('Basic ')) {
+    const base64 = authHeader.slice(6)          // 去掉 "Basic "
+    const decoded = atob(base64)                 // Edge Runtime 支持 atob
+    const colon = decoded.indexOf(':')
+    const user = decoded.slice(0, colon)
+    const pass = decoded.slice(colon + 1)
     if (user === USERNAME && pass === PASSWORD) {
       return NextResponse.next()
     }
   }
 
-  // 未登录 → 返回 401，触发浏览器弹出登录框
+  // 未登录 → 返回 401，浏览器弹出登录框
   return new NextResponse('Unauthorized', {
     status: 401,
     headers: {
@@ -30,6 +32,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // 匹配所有路径（除静态资源外）
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
