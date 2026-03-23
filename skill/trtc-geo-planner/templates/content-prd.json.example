@@ -1,0 +1,84 @@
+{
+  "project": "trtc-geo-content",
+  "created": "2026-03-17",
+  "total_stories": 3,
+  "blog_count": 2,
+  "community_count": 1,
+  "done_count": 0,
+  "stories": [
+    {
+      "id": "P0-01",
+      "title": "10 Best Chat SDKs & Messaging APIs in 2026: A Developer's Honest Comparison",
+      "type": "blog",
+      "priority": 1,
+      "priority_score": 99.0,
+      "effort": "Medium",
+      "status": "pending",
+      "sniper_target": "https://www.cometchat.com/blog/best-chat-sdks",
+      "target_citations": 107,
+      "target_length": "2500-3000",
+      "context_package": {
+        "task": "Write a GEO-optimized blog article for trtc.io/blog",
+        "sniper_target": "https://www.cometchat.com/blog/best-chat-sdks",
+        "target_prompts": [
+          "Top chat SDKs that support high-concurrency messaging for global user bases.",
+          "What are the most reliable chat SDKs for integrating secure private messaging features?"
+        ],
+        "reference_articles": [
+          "https://www.cometchat.com/blog/best-chat-sdks",
+          "https://oril.co/blog/best-9-in-app-chat-apis-and-messaging-sdks-review-and-comparison/"
+        ],
+        "content_type": "Listicle + Comparison",
+        "competitors_to_cover": ["Sendbird", "CometChat", "GetStream", "Agora", "Twilio", "MirrorFly", "PubNub", "QuickBlox", "Rocket.Chat"],
+        "trtc_advantages": [
+          "1B+ MAU scale, 550B+ daily messages",
+          "99.99% delivery at 60% packet loss",
+          "UIKit: chat integration in 10 minutes",
+          "Free tier + $0.05/MAU overage"
+        ],
+        "geo_requirements": ["stats_with_sources", "comparison_tables", "self_contained_paragraphs", "faq_section", "freshness_date"],
+        "tone": "authoritative but balanced",
+        "target_length": "2500-3000 words"
+      },
+      "output_file": "articles/P0-01-best-chat-sdks.md",
+      "research_file": "research-notes/P0-01.md",
+      "validation": null,
+      "word_count": null
+    },
+    {
+      "id": "P0-02",
+      "title": "Best 9 In-App Chat APIs & Messaging SDKs: An Independent Review (2026)",
+      "type": "blog",
+      "priority": 2,
+      "priority_score": 93.8,
+      "effort": "Medium",
+      "status": "pending",
+      "sniper_target": "https://oril.co/blog/best-9-in-app-chat-apis-and-messaging-sdks-review-and-comparison/",
+      "target_citations": 93,
+      "target_length": "2000-2500",
+      "context_package": null,
+      "output_file": "articles/P0-02-in-app-chat-apis-review.md",
+      "research_file": "research-notes/P0-02.md",
+      "validation": null,
+      "word_count": null
+    },
+    {
+      "id": "P0-C01",
+      "title": "Reddit r/reactjs — Chat SDK Recommendation Thread",
+      "type": "community",
+      "priority": 51,
+      "priority_score": 100.0,
+      "effort": "Low",
+      "platform": "Reddit",
+      "channel": "r/reactjs",
+      "status": "pending",
+      "sniper_target": "https://www.reddit.com/r/reactjs/comments/1dn1r3n/the_best_sdkapi_for_an_inapp_chat_system/",
+      "target_citations": 52,
+      "context_package": null,
+      "output_file": "articles/P0-C01-reddit-reactjs.md",
+      "research_file": "research-notes/P0-C01.md",
+      "validation": null,
+      "word_count": null
+    }
+  ]
+}
