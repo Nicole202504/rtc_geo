@@ -35,7 +35,10 @@ LOOP: while 有 status="pending" 的文章:
      验证失败 → 自动修复 → 重新验证 → 仍失败则 status="failed"，记录原因
   7. 更新 progress.txt（本篇学习）
   8. 立即写入所有状态到文件
-  9. 继续下一篇，不等待用户确认
+  9. 【实时同步】自动同步本篇到面板：
+     python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --id {article_id}
+     （面板上可实时看到新文章，状态为 reviewing）
+  10. 继续下一篇，不等待用户确认
 END LOOP
 ```
 

@@ -38,6 +38,12 @@ python3 "PLUGIN_DIR/scripts/generate-cover.py" \
   --out-dir "output/covers"
 ```
 
+封面生成完毕后，**自动批量更新到面板**（更新已有文章的封面图）：
+
+```bash
+python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --batch --status done
+```
+
 **单篇模式：**
 
 ```bash
@@ -47,7 +53,11 @@ python3 "PLUGIN_DIR/scripts/generate-cover.py" \
   --output "output/covers/<id>-cover.png"
 ```
 
-单篇模式时，从 `content-prd.json` 中读取对应 id 的 `title` 字段作为标题。
+单篇封面生成后同步：
+
+```bash
+python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --id <article_id>
+```
 
 ## 封面规格
 

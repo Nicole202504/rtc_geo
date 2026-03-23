@@ -27,10 +27,12 @@ argument: mode
 | Step | 名称 | 对应命令 | 主要输出 |
 |------|------|----------|----------|
 | 1 | 数据分析 | `/geo-analyze` | `output/geo-analysis.json` |
-| 2 | 策略规划 | `/geo-plan` | `output/geo-strategy-report.md` + `content-prd.json` |
-| 3 | 文章写作 | `/geo-write` | `output/articles/*.md` |
-| 4 | 合规审核 | `/geo-audit` | 审核报告（嵌入 content-prd.json） |
-| 5 | 审核平台 | `/geo-review` | 打开 http://localhost:8765/review-ui/index.html |
+| 2 | 策略规划 | `/geo-plan` | `output/geo-strategy-report.md` + `content-prd.json` + **面板 Campaign 自动创建** |
+| 3 | 文章写作 | `/geo-write` | `output/articles/*.md` + **每篇写完自动同步到面板** |
+| 4 | 封面生成 | `/geo-cover` | `output/covers/*.png` + **封面自动更新到面板** |
+| 5 | 合规审核 | `/geo-audit` | 审核报告（嵌入 content-prd.json） |
+| 6 | 面板同步 | `/geo-sync` | 补同步漏掉的文章（正常情况步骤 3 已自动同步） |
+| 7 | 审核平台 | `/geo-review` | 打开 http://localhost:8765/review-ui/index.html |
 
 ## 执行逻辑
 
@@ -73,7 +75,10 @@ argument: mode
 - 文章总数：20 篇（P0: 10 篇 / P1: 10 篇）
 - 全部通过验证：✅
 - 总词数：约 52,000 词
+- 面板同步：20 篇已实时上传
 
 📁 输出目录：output/
-🌐 审核平台：http://localhost:8765/review-ui/index.html
+🌐 在线审核面板：https://geo-ops-panel.vercel.app
+   账号：rtc2026  密码：rtc2026
+🖥  本地审核平台：http://localhost:8765/review-ui/index.html
 ```

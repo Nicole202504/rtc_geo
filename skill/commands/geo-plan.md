@@ -107,7 +107,24 @@ python3 "PLUGIN_DIR/scripts/generate-content-prd.py" \
 
 status 初始值全部为 `"pending"`。
 
-### 3. 输出摘要
+### 3. 在面板自动创建 Campaign
+
+`content-prd.json` 生成后，立即在运营面板创建对应的 Campaign：
+
+```bash
+python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --init-campaign
+```
+
+逻辑：
+1. 读取 `content-prd.json` 中的 `project.name`（或 `title`）作为 Campaign 名称
+2. 去面板查找同名 Campaign：
+   - 找到 → 复用，将 ID 写入 `.env`
+   - 没找到 → 自动新建，将 ID 写入 `.env`
+3. 写入 `.env` 后后续 `/geo-write` 每篇写完即可直接同步，无需再建
+
+> Campaign 创建好后，运营同学打开面板就能看到这个批次，实时跟踪写作进度。
+
+### 4. 输出摘要
 
 ```
 ✅ 策略规划完成
@@ -122,5 +139,9 @@ status 初始值全部为 `"pending"`。
 - output/geo-strategy-report.md
 - output/content-prd.json
 
-下一步：/geo-write（开始写文章）
+🌐 面板 Campaign 已创建：
+- 名称：TRTC GEO 2026
+- 地址：https://geo-ops-panel.vercel.app
+
+下一步：/geo-write（开始写文章，每篇完成后自动同步到面板）
 ```

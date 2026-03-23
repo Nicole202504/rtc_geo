@@ -318,14 +318,25 @@ def sync_batch(panel_url: str, campaign_id: str, status_filter: list = None):
 # 入口
 # ──────────────────────────────────────────────
 
+def init_campaign(panel_url: str, prd: dict):
+    """仅建/查 Campaign，不同步文章。供 /geo-plan 完成后调用。"""
+    print(f"\n🚀 初始化面板 Campaign")
+    print(f"   面板地址：{panel_url}")
+    campaign_id = get_or_create_campaign(panel_url, prd, force_new=False)
+    print(f"\n✅ Campaign 就绪：{campaign_id}")
+    print(f"   ID 已写入 .env，后续 /geo-write 每篇完成后自动同步")
+    print(f"\n🌐 面板地址：{panel_url}")
+
+
 def main():
     load_env()
     parser = argparse.ArgumentParser(description="同步 GEO 文章到运营面板（自动管理 Campaign）")
-    parser.add_argument("--id",           help="同步单篇文章，如 P0-01")
-    parser.add_argument("--batch",        action="store_true", help="批量同步所有 done 文章")
-    parser.add_argument("--new-campaign", action="store_true", help="强制新建 Campaign（忽略已保存的 ID）")
-    parser.add_argument("--panel-url",    help="面板地址（也可通过 GEO_PANEL_URL 环境变量设置）")
-    parser.add_argument("--status",       default="done", help="同步哪些状态的文章（默认 done）")
+    parser.add_argument("--id",             help="同步单篇文章，如 P0-01")
+    parser.add_argument("--batch",          action="store_true", help="批量同步所有 done 文章")
+    parser.add_argument("--init-campaign",  action="store_true", help="仅建/查 Campaign，不同步文章（供 /geo-plan 调用）")
+    parser.add_argument("--new-campaign",   action="store_true", help="强制新建 Campaign（忽略已保存的 ID）")
+    parser.add_argument("--panel-url",      help="面板地址（也可通过 GEO_PANEL_URL 环境变量设置）")
+    parser.add_argument("--status",         default="done", help="同步哪些状态的文章（默认 done）")
     args = parser.parse_args()
 
     if args.panel_url:
@@ -333,9 +344,14 @@ def main():
 
     panel_url = get_panel_url()
 
-    # 读取 PRD，自动获取或创建 Campaign
+    # 读取 PRD
     with open(PRD_PATH, encoding="utf-8") as f:
         prd = json.load(f)
+
+    # --init-campaign：只建 Campaign，不同步文章
+    if args.init_campaign:
+        init_campaign(panel_url, prd)
+        return
 
     print(f"\n🚀 GEO 面板同步")
     print(f"   面板地址：{panel_url}")
