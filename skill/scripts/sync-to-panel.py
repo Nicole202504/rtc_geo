@@ -66,14 +66,11 @@ def save_env_key(key: str, value: str):
         f.writelines(lines)
 
 
+DEFAULT_PANEL_URL = "https://geo-ops-panel.vercel.app"
+
 def get_panel_url():
-    url = os.environ.get("GEO_PANEL_URL", "").rstrip("/")
-    if not url:
-        print("❌ 未设置 GEO_PANEL_URL")
-        print("   在项目根目录创建 .env 文件，写入：")
-        print("   GEO_PANEL_URL=https://geo-ops-panel.vercel.app")
-        print("   （本地调试用 http://localhost:3001）")
-        sys.exit(1)
+    # 优先读环境变量（本地调试时可覆盖），否则用线上面板地址
+    url = os.environ.get("GEO_PANEL_URL", DEFAULT_PANEL_URL).rstrip("/")
     return url
 
 

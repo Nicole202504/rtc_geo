@@ -7,15 +7,14 @@ argument: scope
 
 # /geo-sync — 同步到运营面板
 
-将本地生成的文章和封面图一键同步到在线运营面板（geo-ops-panel），
-供团队在线审核和发布。**无需手动建 Campaign，全自动管理。**
+将本地生成的文章和封面图一键同步到在线运营面板，供团队在线审核和发布。
+**无需任何配置，拉下代码直接跑。**
 
 ## 参数
 
 - 无参数：批量同步所有 `done` 状态的文章
 - `--id P0-01`：只同步指定一篇
 - `--new-campaign`：强制新建 Campaign（用于新一轮内容批次）
-- `--panel-url <url>`：临时指定面板地址（优先级高于 .env）
 
 示例：
 - `/geo-sync` — 批量同步全部完成文章
@@ -25,31 +24,7 @@ argument: scope
 ## 前置要求
 
 - `output/content-prd.json` 存在且有 `done` 状态的文章
-- 面板服务正在运行（本地或 Vercel）
-
-## 首次运行自动配置
-
-**运营同学什么都不用手动配置。** `/geo-sync` 在执行前会自动检测环境：
-
-```
-检测到 .env 不存在 / GEO_PANEL_URL 未设置
-   ↓
-询问用户：面板是本地还是线上？
-   ├─ 本地  → 自动写入 GEO_PANEL_URL=http://localhost:3001
-   └─ 线上  → 自动写入 GEO_PANEL_URL=https://geo-ops-panel.vercel.app
-   ↓
-.env 文件自动创建完成，继续同步
-```
-
-执行逻辑：
-
-1. 检查项目根目录是否存在 `.env` 且包含 `GEO_PANEL_URL`
-2. 如果不存在，询问用户：「面板跑在本地还是线上 Vercel？」
-   - 回答「本地」→ 写入 `GEO_PANEL_URL=http://localhost:3001`
-   - 回答「线上」→ 写入 `GEO_PANEL_URL=https://geo-ops-panel.vercel.app`
-3. 写入 `.env` 后继续执行同步
-
-> `GEO_CAMPAIGN_ID` **不需要手动填写**，脚本会自动管理。
+- 无需其他配置，面板地址已内置
 
 ## 自动 Campaign 管理逻辑
 
@@ -67,46 +42,27 @@ argument: scope
 同步文章 + 封面到该 Campaign
 ```
 
-## 执行步骤
+## 执行命令
 
-### Step 1：检查并自动配置 .env
-
-```python
-# 伪代码：Claude 执行的逻辑
-env_path = os.path.join(PLUGIN_ROOT, ".env")
-if not os.path.isfile(env_path) or "GEO_PANEL_URL" not in open(env_path).read():
-    # 询问用户
-    ask: "面板跑在哪里？"
-    options:
-      - "本地（http://localhost:3001）"
-      - "线上 Vercel（https://geo-ops-panel.vercel.app）"
-    # 根据回答写入 .env
-    write GEO_PANEL_URL=<选择的地址> to .env
-```
-
-实际执行：**在运行脚本之前，Claude 先检查 `.env`，如果缺少 `GEO_PANEL_URL`，主动询问用户面板地址（本地 / 线上），然后用 Write 工具写入 `.env`。**
-
-### Step 2：批量同步
+**批量同步（无需任何参数）：**
 
 ```bash
 python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --batch
 ```
 
-### Step 3（单篇）：
+**单篇同步：**
 
 ```bash
 python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --id {article_id}
 ```
 
-### Step 4（新一轮内容强制建新 Campaign）：
+**新一轮内容，强制建新 Campaign：**
 
 ```bash
 python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --batch --new-campaign
 ```
 
 ## 同步内容
-
-每篇文章同步以下字段到面板：
 
 | 字段 | 来源 |
 |------|------|
@@ -125,7 +81,6 @@ python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --batch --new-campaign
    面板地址：https://geo-ops-panel.vercel.app
    🆕 未找到同名 Campaign，自动新建「TRTC GEO 2026」...
    ✅ Campaign 已创建：xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-   Campaign：xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 🔄 批量同步 20 篇文章
 ────────────────────────────────────────
@@ -138,10 +93,11 @@ python3 "PLUGIN_DIR/scripts/sync-to-panel.py" --batch --new-campaign
 ✅ 同步完成！20 篇已上传
 
 🌐 前往面板审核：https://geo-ops-panel.vercel.app
+   账号：rtc2026  密码：rtc2026
 ```
 
 ## 下一步
 
-同步完成后，通知团队在面板审核：
-- 面板地址：`GEO_PANEL_URL` 中配置的地址
-- 审核台：点击文章 → 预览 → 通过 / 驳回 / 备注
+打开面板审核：**https://geo-ops-panel.vercel.app**
+- 账号：`rtc2026`
+- 密码：`rtc2026`
