@@ -5,6 +5,39 @@ import { supabase, Campaign, Article } from '@/lib/supabase'
 import { STATUS_LABELS, STATUS_COLORS, cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 
+const CMS_API = 'http://9.135.146.68:8080/api/import/article'
+
+/** 将标题转成 URL slug */
+function titleToSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .slice(0, 80)
+}
+
+/** 将图片 URL 转成 base64 字符串（不含 data: 前缀） */
+async function urlToBase64(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const blob = await res.blob()
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const result = reader.result as string
+        // 去掉 "data:image/png;base64," 前缀，只保留 base64 数据
+        resolve(result.split(',')[1] || '')
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  } catch {
+    return null
+  }
+}
+
 function ReviewContent() {
   const searchParams = useSearchParams()
   const campaignId = searchParams.get('campaign')
@@ -17,6 +50,10 @@ function ReviewContent() {
   const [comment, setComment] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  // CMS 上传状态
+  const [uploading, setUploading] = useState(false)
+  const [uploadResult, setUploadResult] = useState<{ ok: boolean; msg: string } | null>(null)
 
   useEffect(() => { loadCampaigns() }, [])
   useEffect(() => { if (selectedCampaign) loadArticles(selectedCampaign) }, [selectedCampaign])
@@ -42,6 +79,7 @@ function ReviewContent() {
     setSelected(a)
     setComment(a.review_comment || '')
     setSaved(false)
+    setUploadResult(null)
   }
 
   async function submitReview(action: 'approved' | 'rejected') {
@@ -69,6 +107,57 @@ function ReviewContent() {
     setArticles(prev => prev.map(a => a.id === selected.id ? { ...a, ...update } : a))
     setSaving(false)
     setSaved(true)
+  }
+
+  async function uploadToCms() {
+    if (!selected) return
+    setUploading(true)
+    setUploadResult(null)
+
+    try {
+      // 构建 poster（封面图 base64）
+      let poster: string | undefined
+      if (selected.cover_image_url) {
+        const b64 = await urlToBase64(selected.cover_image_url)
+        if (b64) poster = b64
+      }
+
+      const payload: Record<string, any> = {
+        title: selected.title || '',
+        route_name: titleToSlug(selected.title || 'article'),
+        rich_content: selected.content_md || '',
+        language: 'English',
+      }
+      if (poster) payload.poster = poster
+
+      const res = await fetch(CMS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const json = await res.json().catch(() => ({}))
+
+      if (res.ok && (json.code === 200 || json.code === 0 || json.id || json.data?.id)) {
+        const cmsId = json.data?.id || json.id || String(json.code)
+        // 更新 Supabase 记录
+        const update = {
+          status: 'published' as const,
+          cms_article_id: String(cmsId),
+        }
+        await supabase.from('articles').update(update).eq('id', selected.id)
+        setSelected({ ...selected, ...update })
+        setArticles(prev => prev.map(a => a.id === selected.id ? { ...a, ...update } : a))
+        setUploadResult({ ok: true, msg: `✅ 已发布！CMS ID: ${cmsId}` })
+      } else {
+        const errMsg = json.message || json.msg || JSON.stringify(json).slice(0, 100)
+        setUploadResult({ ok: false, msg: `❌ 发布失败：${errMsg}` })
+      }
+    } catch (e: any) {
+      setUploadResult({ ok: false, msg: `❌ 网络错误：${e.message}` })
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
@@ -165,11 +254,11 @@ function ReviewContent() {
                 placeholder="填写修改意见（拒绝时必填）..."
                 className="w-full text-xs border border-gray-200 rounded-lg p-2 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500" />
             </div>
-            {/* 操作按钮 */}
+            {/* 审核按钮 */}
             <div className="space-y-2">
               <button onClick={() => submitReview('approved')} disabled={saving}
                 className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">
-                ✅ 通过发布
+                ✅ 通过审核
               </button>
               <button onClick={() => submitReview('rejected')} disabled={saving || !comment}
                 className="w-full bg-red-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-600 disabled:opacity-50">
@@ -177,6 +266,34 @@ function ReviewContent() {
               </button>
             </div>
             {saved && <p className="text-xs text-green-600 text-center">✓ 已保存</p>}
+
+            {/* 发布到 CMS */}
+            <div className="pt-3 border-t border-gray-100">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">发布到 CMS</p>
+              {selected.status !== 'approved' && selected.status !== 'published' && (
+                <p className="text-xs text-amber-600 mb-2">⚠️ 请先通过审核再发布</p>
+              )}
+              <button
+                onClick={uploadToCms}
+                disabled={uploading || selected.status === 'published' || (selected.status !== 'approved')}
+                className={cn(
+                  'w-full py-2 rounded-lg text-sm font-medium transition-colors',
+                  selected.status === 'published'
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : selected.status === 'approved'
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                )}
+              >
+                {uploading ? '⏳ 上传中...' : selected.status === 'published' ? '✓ 已发布到 CMS' : '🚀 上传到 CMS'}
+              </button>
+              {uploadResult && (
+                <p className={cn('text-xs mt-2 text-center', uploadResult.ok ? 'text-green-600' : 'text-red-500')}>
+                  {uploadResult.msg}
+                </p>
+              )}
+            </div>
+
             {/* 文章信息 */}
             <div className="pt-3 border-t border-gray-100 space-y-2">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">文章信息</p>
