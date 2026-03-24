@@ -5,7 +5,7 @@ import { supabase, Campaign, Article } from '@/lib/supabase'
 import { STATUS_LABELS, STATUS_COLORS, cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 
-const CMS_API = 'http://9.135.146.68:8080/api/import/article'
+const CMS_API = '/api/cms-proxy'
 
 /** 将标题转成 URL slug */
 function titleToSlug(title: string): string {
