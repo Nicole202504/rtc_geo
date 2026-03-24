@@ -109,8 +109,32 @@ function ReviewContent() {
             {selected.cover_image_url && (
               <img src={selected.cover_image_url} alt="封面" className="w-full max-w-sm rounded-lg mb-6 border" />
             )}
-            <div className="prose prose-sm max-w-none text-gray-800">
-              <ReactMarkdown>{selected.content_md || '*暂无内容*'}</ReactMarkdown>
+            <div className="text-gray-800 text-sm leading-relaxed">
+              <ReactMarkdown
+                components={{
+                  h1: ({children}) => <h1 className="text-2xl font-bold mt-6 mb-3 text-gray-900">{children}</h1>,
+                  h2: ({children}) => <h2 className="text-xl font-bold mt-5 mb-2 text-gray-900">{children}</h2>,
+                  h3: ({children}) => <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-800">{children}</h3>,
+                  h4: ({children}) => <h4 className="text-base font-semibold mt-3 mb-1 text-gray-800">{children}</h4>,
+                  p: ({children}) => <p className="mb-3 leading-7">{children}</p>,
+                  ul: ({children}) => <ul className="list-disc pl-5 mb-3 space-y-1">{children}</ul>,
+                  ol: ({children}) => <ol className="list-decimal pl-5 mb-3 space-y-1">{children}</ol>,
+                  li: ({children}) => <li className="leading-6">{children}</li>,
+                  strong: ({children}) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                  em: ({children}) => <em className="italic">{children}</em>,
+                  blockquote: ({children}) => <blockquote className="border-l-4 border-blue-300 pl-4 my-3 text-gray-600 italic">{children}</blockquote>,
+                  code: ({children, className}) => className
+                    ? <code className="block bg-gray-100 rounded-lg p-3 text-xs font-mono overflow-x-auto my-3 whitespace-pre">{children}</code>
+                    : <code className="bg-gray-100 rounded px-1.5 py-0.5 text-xs font-mono text-red-600">{children}</code>,
+                  pre: ({children}) => <pre className="bg-gray-100 rounded-lg p-3 overflow-x-auto my-3 text-xs">{children}</pre>,
+                  table: ({children}) => <div className="overflow-x-auto my-4"><table className="min-w-full border-collapse text-sm">{children}</table></div>,
+                  thead: ({children}) => <thead className="bg-gray-100">{children}</thead>,
+                  th: ({children}) => <th className="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-700 text-xs">{children}</th>,
+                  td: ({children}) => <td className="border border-gray-300 px-3 py-2 text-gray-700 text-xs">{children}</td>,
+                  hr: () => <hr className="my-5 border-gray-200" />,
+                  a: ({children, href}) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{children}</a>,
+                }}
+              >{selected.content_md || '*暂无内容*'}</ReactMarkdown>
             </div>
           </div>
         ) : (
